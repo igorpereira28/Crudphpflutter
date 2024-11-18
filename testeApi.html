@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste de Requisições</title>
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>C.R.U.D. padrão API</h1>
+
+    Id <input type="text" id="id" name="id" value="0" size="3" readonly /><br /><br />
+    Nome <input type="text" id="nome" name="nome" value="" size="35" /><br /><br />
+    Categoria <input type="text" id="categoria" name="categoria" value="" size="20" /><br /><br />
+
+    <button onclick="get()">GET (Consulta/Lista)</button>
+    <button onclick="post()">POST (Cadastrar)</button>
+    <button onclick="put()">PUT (Alterar)</button>
+    <button onclick="del()">DELETE (Excluir)</button>
+    <div id="table-container"></div>
+
+    <script>
+        async function get() {
+            try {
+                const response = await fetch("http://localhost/api/testeApi.php/cliente/list", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const data = await response.json();
+
+                let tableHtml = "<table><tr><th>ID</th><th>Nome</th><th>Categoria</th></tr>";
+                data.forEach((item) => {
+                    tableHtml += `<tr onclick='selectRow(${item.id}, "${item.nome}", "${item.categoria}")'>`;
+                    tableHtml += `<td>${item.id}</td>`;
+                    tableHtml += `<td>${item.nome}</td>`;
+                    tableHtml += `<td>${item.categoria}</td>`;
+                    tableHtml += `</tr>`;
+                });
+                tableHtml += "</table>";
+
+                document.getElementById("table-container").innerHTML = tableHtml;
+            } catch (error) {
+                console.error("Erro ao executar solicitação GET:", error);
+            }
+        }
+
+        async function post() {
+            try {
+			    
+                const response = await fetch("http://localhost/api/testeApi.php/cliente", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        nome: document.getElementById("nome").value,
+                        categoria: document.getElementById("categoria").value,
+                    }),
+                });
+                const data = await response.json();
+                alert(JSON.stringify(data.message));
+                get(); // Atualiza a tabela após adicionar
+            } catch (error) {
+                console.error("Erro ao executar solicitação POST:", error);
+            }
+        }
+
+        window.onload = get;
+
+        async function put() {
+            try {
+                const response = await fetch("http://localhost/api/testeApi.php/cliente/" + document.getElementById("id").value, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        nome: document.getElementById("nome").value,
+                        categoria: document.getElementById("categoria").value,
+                    }),
+                });
+                const data = await response.json();
+                alert(JSON.stringify(data.message));
+                get(); // Atualiza a tabela após editar
+            } catch (error) {
+                console.error("Erro ao executar solicitação PUT:", error);
+            }
+        }
+
+        async function del() {
+            try {
+                const response = await fetch("http://localhost/api/testeApi.php/cliente/" + document.getElementById("id").value, {
+                    method: "DELETE",
+                });
+                const data = await response.json();
+                alert(JSON.stringify(data.message));
+                get(); // Atualiza a tabela após excluir
+            } catch (error) {
+                console.error("Erro ao executar solicitação DELETE:", error);
+            }
+        }
+
+        function selectRow(id, nome, categoria) {
+            document.getElementById("id").value = id;
+            document.getElementById("nome").value = nome;
+            document.getElementById("categoria").value = categoria;
+        }
+    </script>
+</body>
+</html>
